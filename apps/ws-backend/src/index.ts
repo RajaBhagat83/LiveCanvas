@@ -1,17 +1,28 @@
 import express from "express"
 import { WebSocketServer } from "ws";
-import {createServer} from "http"
+import jwt, { JwtPayload } from "jsonwebtoken"
 const app = express();
+import JWTSECRET from "../../http-backend/src/config"
 
-const server = createServer(app);
-const wss = new WebSocketServer({server:server});
+const wss = new WebSocketServer({port:8080});
 
-wss.on('connection',(ws) =>{
-  console.log("A User has connected ");
-  ws.send("Something is send from the web socket server backend");
-})
-
-server.listen(8001,()=>{
-    console.log(`Server listening on port http://localhost:8001`);
-})
+ wss.on('connection',(ws,request) =>{
+  const url = request.url;//ws://localhost:3000?token="123"
+    if(!url){
+      return ;
+    }
+    const queryParams = new URLSearchParams(url.split('?')[1]);
+    const token  =queryParams.get('token') ?? "";
+   const decoded = jwt.verify(token,JWTSECRET);
+   if(!decoded || !(decoded as JwtPayload).user){
+    ws.close();
+    return;
+   }
+  ws.on('message',(data)=>{
   
+  })
+}) 
+
+
+
+console.log('WebSocket server is running on ws://localhost:8080');

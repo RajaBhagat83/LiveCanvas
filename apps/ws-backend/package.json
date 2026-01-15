@@ -4,14 +4,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js",
+    "build": "tsc -b",
     "start": "node dist/index.js",
     "dev": "pnpm run build && pnpm run start"
   },
   "dependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "ws": "^8.19.0"
   },
   "keywords": [],
