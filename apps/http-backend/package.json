@@ -25,5 +25,6 @@
     "@repo/backend-comn":"workspace:*",
     "@repo/common":"workspace:*",
     "@repo/db":"workspace:*"
+
   }
 }

@@ -18,6 +18,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "prisma": "^7.2.0",
     "zod": "^4.3.5"
   }
 }
