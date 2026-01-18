@@ -7,7 +7,7 @@ import {
   CreateUserSchema,
   CreateRoomSchema,
 } from "@repo/common/zod";
-import { prisma } from "@repo/db/client";
+import { prisma } from "@repo/db/config";
 
 
 const app = express();
@@ -63,6 +63,7 @@ app.post("/signup", async (req, res) => {
   //create a user and store in db
   const createUser = await prisma.user.create({
     data: {
+      id:"1",
       email: email,
       password: password,
       name: "Raja"
