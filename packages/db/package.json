@@ -1,6 +1,7 @@
 {
   "name": "@repo/db",
   "version": "1.0.0",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,7 +16,8 @@
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
     "@types/pg": "^8.16.0",
-    "prisma": "^7.2.0"
+    "prisma": "^7.2.0",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",

@@ -7,7 +7,7 @@ import {
   CreateUserSchema,
   CreateRoomSchema,
 } from "@repo/common/zod";
-import { prisma } from "@repo/db/config";
+import prisma  from "@repo/db/config"
 
 
 const app = express();
