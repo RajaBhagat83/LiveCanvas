@@ -11,9 +11,11 @@
      "./zod":"./src/index.ts"
   },
   "license": "ISC",
-  "@repo/typescript-config":"workspace:*",
   "description": "",
   "dependencies": {
     "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@repo/typescript-config":"workspace:*"
   }
 }

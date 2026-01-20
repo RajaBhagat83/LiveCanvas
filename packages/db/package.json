@@ -6,8 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "exports":{
-     "./config":"./src/index.ts"
+  "exports": {
+    "./config": "./src/index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "@types/node": "^22.15.3",
     "@types/pg": "^8.16.0",
     "prisma": "^7.2.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   },
   "dependencies": {

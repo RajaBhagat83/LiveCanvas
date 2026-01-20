@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 import { Request, Response ,NextFunction} from "express";
 import { JWTSECRET } from "@repo/backend-comn/config"
 
@@ -17,6 +17,7 @@ const UserMiddleware = (req: Request, res: Response, next: NextFunction) => {
     if(typeof decoded == "string"){
       return;
     }
+    decoded.email ? console.log(decoded.email):decoded;
     req.user = decoded;
     next();
   } catch (err) {
