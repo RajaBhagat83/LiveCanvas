@@ -27,7 +27,7 @@ app.post("/signin", async (req, res) => {
       msg: "Fill all the required Fields",
     });
   }
-  const { email, password } = result.data;
+  const {  email, password } = result.data;
   //db call to find
   const user = await prisma.user.findUnique({
     where: {
@@ -38,8 +38,11 @@ app.post("/signin", async (req, res) => {
   if (!user) {
     res.json("User not found Please sign up");
   }
-  const token = jwt.sign({ email: email }, JWTSECRET, { expiresIn: 3600 });
+  const token = jwt.sign({ id:user?.id,email: email }, JWTSECRET, {
+    expiresIn: 3600,
+  });
   return res.json({
+    id:user?.id,
     email,
     token,
   });
@@ -56,8 +59,7 @@ app.post("/signup", async (req, res) => {
     });
   }
 
-  const { id, email, password, name } = result.data;
-  console.log("Attempting to create user with ID:", id, "Email:", email);
+  const { email, password, name } = result.data;
   //find is user already exist
   const findUser = await prisma.user.findUnique({
     where: {
@@ -71,19 +73,19 @@ app.post("/signup", async (req, res) => {
     });
   }
   //create a user and store in db
-  const createUser = await prisma.user.create({
+   const user =  await prisma.user.create({
     data: {
-      id: id,
       email: email,
       password: password,
       name: name,
     },
   });
 
-  const token = jwt.sign({ email: email, name: name }, JWTSECRET, {
+  const token = jwt.sign({ id:user.id,email: email, name: name }, JWTSECRET, {
     expiresIn: 3600,
   });
   return res.json({
+    id:user.id,
     name,
     email,
     token,
@@ -91,17 +93,54 @@ app.post("/signup", async (req, res) => {
 });
 
 //room endpoint
-app.post("/room", UserMiddleware ,async (req, res) => {
-  const data = CreateRoomSchema.safeParse(req.body);
-  if (!data.success) {
+app.post("/room", UserMiddleware, async (req, res) => {
+  const result = CreateRoomSchema.safeParse(req.body);
+  if (!result.success) {
     return res.status(404).json({
       msg: "Input has some fault data",
     });
   }
-  const { name ,email } =req.user;
-  res.json({
-   name,
-   email
+  const { name } = result.data;
+  const findRoom = await prisma.room.findUnique({
+    where: {
+      slug: name,
+    },
+  });
+  if (findRoom) {
+    return findRoom;
+  }
+const id =req.user;
+if(id == undefined){
+  return res.status(404).send("userid not found");
+}
+  const createRoom = await prisma.room.create({
+    data: {
+      slug: name,
+      adminId:id.toString()
+    },
+  });
+  return res.json({
+   roomId: createRoom.id,
+  message: "Room Created Successfully",
+  });
+});
+
+app.get("/chats/room", async (req, res) => {
+  const room = req.query.room;
+  if (!room) {
+    return res.status(404).json({
+      msg: "Room id not found",
+    });
+  }
+  const findChats = await prisma.room.findFirst({
+    where: {
+      slug: room.toString(),
+    },
+    include: { Chat: true },
+  });
+  return res.json({
+    findChats,
+    message: "Fetching chats",
   });
 });
 
@@ -113,10 +152,4 @@ const server = app.listen(8001, () => {
 
 server.on("close", () => {
   console.log("Server closed");
-});
-
-process.on("SIGINT", () => {
-  server.close(() => {
-    console.log("Process terminated");
-  });
 });

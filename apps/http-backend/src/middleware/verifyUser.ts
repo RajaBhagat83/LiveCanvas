@@ -17,7 +17,7 @@ const UserMiddleware = (req: Request, res: Response, next: NextFunction) => {
     if(typeof decoded == "string"){
       return;
     }
-    decoded.email ? console.log(decoded.email):decoded;
+    decoded.email ? console.log("email",decoded.email):decoded;
     req.user = decoded;
     next();
   } catch (err) {
