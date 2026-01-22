@@ -61,7 +61,7 @@ app.post("/signup", async (req, res) => {
 
   const { email, password, name } = result.data;
   //find is user already exist
-  const findUser = await prisma.user.findUnique({
+  const findUser = await prisma.user.findFirst({
     where: {
       email: email,
     },
@@ -109,14 +109,12 @@ app.post("/room", UserMiddleware, async (req, res) => {
   if (findRoom) {
     return findRoom;
   }
-const id =req.user;
-if(id == undefined){
-  return res.status(404).send("userid not found");
-}
+  //@ts-ignore
+const userId=req.user.id;
   const createRoom = await prisma.room.create({
     data: {
       slug: name,
-      adminId:id.toString()
+      adminId:userId
     },
   });
   return res.json({
