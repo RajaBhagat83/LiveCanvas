@@ -123,22 +123,27 @@ const userId=req.user.id;
   });
 });
 
-app.get("/chats/room", async (req, res) => {
-  const room = req.query.room;
-  if (!room) {
+app.get("/chats/:roomId", async (req, res) => {
+  const roomId = Number(req.params.roomId);
+  console.log(roomId)
+  if (!roomId) {
     return res.status(404).json({
       msg: "Room id not found",
     });
   }
-  const findChats = await prisma.room.findFirst({
+  const findChats = await prisma.chat.findMany({
     where: {
-      slug: room.toString(),
+      roomId: roomId
     },
-    include: { Chat: true },
+    orderBy:{
+      id:"desc"
+    },
+    take:50
   });
+
+
   return res.json({
-    findChats,
-    message: "Fetching chats",
+     messages: findChats
   });
 });
 
