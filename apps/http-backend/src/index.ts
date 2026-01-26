@@ -8,8 +8,15 @@ import {
 } from "@repo/common/zod";
 import prisma from "@repo/db/config";
 import UserMiddleware from "./middleware/verifyUser";
+import cors from "cors"
+
 
 const app = express();
+app.use(cors({
+    origin:"http://localhost:3000",
+    credentials: true
+  }))
+
 app.use(express.json());
 
 //health checkpoint
@@ -21,6 +28,7 @@ app.get("/health", (req, res) => {
 
 //signin endpoint
 app.post("/signin", async (req, res) => {
+  console.log(req.body);
   const result = SiginSchema.safeParse(req.body);
   if (!result.success) {
     return res.status(404).json({
@@ -36,7 +44,7 @@ app.post("/signin", async (req, res) => {
     },
   });
   if (!user) {
-    res.json("User not found Please sign up");
+    return res.status(404).json("User not found Please sign up");
   }
   const token = jwt.sign({ id:user?.id,email: email }, JWTSECRET, {
     expiresIn: 3600,
