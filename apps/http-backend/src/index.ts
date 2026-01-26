@@ -154,7 +154,7 @@ app.get("/room/:slug",async (req,res) => {
        slug:slug
     }
   })
-  return res.status(404).json({
+  return res.json({
     room
   })
 })

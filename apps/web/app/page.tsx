@@ -18,7 +18,7 @@ export default function Home() {
          setSlug(e.target.value);
       }} />
       <button onClick={() => {
-        router.push(`/room/:${slug}`);
+        router.push(`/room/${slug}`);
       }}>Join Room</button>
      </div>
    </div>
