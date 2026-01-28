@@ -18,7 +18,7 @@ export default function Home() {
       alignItems:"center"
      }}>
       <div>
-      <input type="text" placeholder="roomId" value={slug} onChange={(e) => {
+      <input type="text" placeholder="Room Name" value={slug} onChange={(e) => {
          setSlug(e.target.value);
       }} />
       <button onClick={() => {
