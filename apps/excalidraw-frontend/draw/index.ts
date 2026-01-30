@@ -20,6 +20,13 @@ type Shapes =
     y1: number;
     x2: number;
     y2: number;
+  } | {
+    type:"eraser",
+    x1:number,
+    y1:number,
+    x2:number,
+    y2:number,
+    size:number
   };
 
 export default async function initDraw(

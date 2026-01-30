@@ -45,6 +45,9 @@ export default function CanvasComponent({
          <button className="p-2 m-2 border-2 border-black rounded-full" onClick={() => {
           setType("line");
         }}>line</button>
+        <button className="p-2 m-2 border-2 border-black rounded-full" onClick={() => {
+          setType("eraser");
+        }}>Eraser</button>
       </div>
     </div>
   );
