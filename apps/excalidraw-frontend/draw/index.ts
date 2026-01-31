@@ -103,6 +103,7 @@ export default async function initDraw(
 
   const mouseMoveHandler = (e: MouseEvent) => {
     if (clicked) {
+      const rect = canvas.getBoundingClientRect()
       const width = e.clientX - startX;
       const height = e.clientY - startY;
       if (type === "rect") {
