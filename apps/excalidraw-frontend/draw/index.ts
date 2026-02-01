@@ -58,6 +58,7 @@ export default async function initDraw(
   let clicked = false;
   let startX = 0;
   let startY = 0;
+  
   const mouseUpHandler = (e: MouseEvent) => {
     clicked = false;
     const width = e.clientX - startX;
