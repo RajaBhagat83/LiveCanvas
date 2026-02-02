@@ -34,10 +34,10 @@ export class Game {
   private socket:WebSocket;
   private type:string;
   private roomId:string;
-  private existingShapes : Shapes[];
   private canvas:HTMLCanvasElement;
+  private ctx : CanvasRenderingContext2D;
+  private existingShapes : Shapes[];
   constructor(canvas:HTMLCanvasElement , roomId:string , socket:WebSocket,type:string) {
-   const  ctx = canvas.getContext("2D");
    this.roomId = roomId;
    this.socket =socket;
    this.type = type;
@@ -47,6 +47,10 @@ export class Game {
     type: "join_room",
     roomId
   }));
-
+  this.initDraw()  
   }
+
+async initDraw(){
+  
+}
 }

@@ -164,6 +164,16 @@ app.get("/room/:slug",async (req,res) => {
   })
   return res.json({
     room
+  });
+});
+
+
+app.get("/room/:roomId",async(req,res) =>{
+  const roomId = req.params.roomId;
+  const roomsJoined = await prisma.user.findUnique({
+    where : {
+      
+    }
   })
 })
 
