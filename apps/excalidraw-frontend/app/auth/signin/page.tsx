@@ -15,6 +15,7 @@ export default function Signin() {
     });
     const token = "Bearer " + response.data.token;
     localStorage.setItem("token", token);
+    localStorage.setItem("user",JSON.stringify(response.data))
     redirect("../home");
   }
 

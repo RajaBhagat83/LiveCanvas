@@ -3,31 +3,33 @@ import axios from "axios";
 
 type Shapes =
   | {
-    type: "rect";
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }
+      type: "rect";
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }
   | {
-    type: "circle";
-    centerX: number;
-    centerY: number;
-    radius: number;
-  } | {
-    type:"line",
-    x1: number;
-    y1: number;
-    x2: number;
-    y2: number;
-  } | {
-    type:"eraser",
-    x1:number,
-    y1:number,
-    x2:number,
-    y2:number,
-    size:number
-  };
+      type: "circle";
+      centerX: number;
+      centerY: number;
+      radius: number;
+    }
+  | {
+      type: "line";
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+    }
+  | {
+      type: "eraser";
+      x1?: number;
+      y1?: number;
+      x2?: number;
+      y2?: number;
+      path?: {x: number, y: number}[];
+    };
 
 export default async function initDraw(
   canvas: HTMLCanvasElement,
@@ -40,10 +42,12 @@ export default async function initDraw(
   let existingShapes: Shapes[] = await getExistingShapes(roomId);
   if (!ctx) return;
 
-  socket.send(JSON.stringify({
-    type: "join_room",
-    roomId
-  }));
+  socket.send(
+    JSON.stringify({
+      type: "join_room",
+      roomId,
+    }),
+  );
 
   socket.onmessage = (event) => {
     const message = JSON.parse(event.data);
@@ -58,11 +62,12 @@ export default async function initDraw(
   let clicked = false;
   let startX = 0;
   let startY = 0;
-  
+  let currentEraserPath: {x: number, y: number}[] = [];
+
   const mouseUpHandler = (e: MouseEvent) => {
     clicked = false;
     const width = e.clientX - startX;
-    const height = e.clientY - startY;
+    const height = e.clientY  - startY;
     const rect: Shapes = {
       type: "rect",
       x: startX,
@@ -76,16 +81,21 @@ export default async function initDraw(
       centerY: startY,
       radius: width,
     };
-    
-    const line:Shapes = {
-      type:"line",
-      x1:startX,
-      y1:startY,
-      x2:e.clientX,
-      y2:e.clientY
-    }
+
+    const line: Shapes = {
+      type: "line",
+      x1: startX,
+      y1: startY,
+      x2: e.clientX,
+      y2: e.clientY,
+    };
+    const eraser: Shapes = {
+      type: "eraser",
+      path: currentEraserPath,
+    };
     let shapes;
-    type == "rect" ? (shapes = rect) : type=="circle" ? (shapes = circ) : (shapes = line);
+   type == "rect" ? (shapes = rect) : type=="circle" ? (shapes = circ) : type =="eraser" ? (shapes = eraser):(shapes = line);
+    if (type === "eraser" && currentEraserPath.length === 0) return;
     existingShapes.push(shapes);
     socket.send(
       JSON.stringify({
@@ -98,23 +108,41 @@ export default async function initDraw(
 
   const mouseDownHandler = (e: MouseEvent) => {
     clicked = true;
-    startX = e.clientX;
-    startY = e.clientY;
+    startX = e.clientX ;
+    startY = e.clientY ;
+    if (type === "eraser") {
+      currentEraserPath = [{x: startX, y: startY}];
+    }
   };
 
-  const mouseMoveHandler = (e: MouseEvent) => {
+  const mouseMoveHandler =async (e: MouseEvent) => {
     if (clicked) {
-      const rect = canvas.getBoundingClientRect()
       const width = e.clientX - startX;
       const height = e.clientY - startY;
+
       if (type === "rect") {
         Rectangle(ctx, existingShapes, canvas, startX, startY, width, height);
       }
       if (type === "circle") {
         Circle(ctx, existingShapes, canvas, startX, startY, Math.abs(width));
       }
-      if(type === "line"){
-        Line(ctx,existingShapes,canvas,startX,startY,e.clientX,e.clientY);
+      if (type === "line") {
+        Line(ctx, existingShapes, canvas, startX, startY, e.clientX, e.clientY);
+      }
+      if (type === "eraser") {
+        currentEraserPath.push({x: e.clientX, y: e.clientY});
+        clearCanvas(existingShapes, canvas, ctx);
+        ctx.strokeStyle = "rgba(0,0,0,1)";
+        ctx.lineWidth = 10;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        if (currentEraserPath.length > 0) {
+          ctx.moveTo(currentEraserPath[0].x, currentEraserPath[0].y);
+          for(let i=1; i<currentEraserPath.length; i++) {
+            ctx.lineTo(currentEraserPath[i].x, currentEraserPath[i].y);
+          }
+        }
+        ctx.stroke();
       }
     }
   };
@@ -141,10 +169,13 @@ function clearCanvas(
   existingShapes.map((shape) => {
     if (shape.type === "rect") {
       ctx.strokeStyle = "rgba(255,255,255)";
+      ctx.lineWidth = 1;
       ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
+     
     }
-    if (shape.type == "circle") {
+    if(shape.type == "circle") {
       ctx.strokeStyle = "rgba(255,255,255)";
+      ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(
         shape.centerX,
@@ -154,12 +185,31 @@ function clearCanvas(
         2 * 3.14,
       );
       ctx.stroke();
+  
     }
-    if(shape.type == "line"){
+    if (shape.type == "line") {
       ctx.strokeStyle = "rgba(255,255,255)";
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(shape.x1,shape.y1);
-      ctx.lineTo(shape.x2,shape.y2)
+      ctx.moveTo(shape.x1, shape.y1);
+      ctx.lineTo(shape.x2, shape.y2);
+      ctx.stroke();
+
+    }
+    if (shape.type == "eraser") {
+      ctx.strokeStyle = "rgba(0,0,0,1)";
+      ctx.lineWidth = 10;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      if (shape.path && shape.path.length > 0) {
+        ctx.moveTo(shape.path[0].x, shape.path[0].y);
+        for(let i=1; i<shape.path.length; i++) {
+          ctx.lineTo(shape.path[i].x, shape.path[i].y);
+        }
+      } else if (shape.x1 !== undefined && shape.y1 !== undefined && shape.x2 !== undefined && shape.y2 !== undefined) {
+        ctx.moveTo(shape.x1, shape.y1);
+        ctx.lineTo(shape.x2, shape.y2);
+      }
       ctx.stroke();
     }
   });
@@ -173,7 +223,8 @@ async function getExistingShapes(roomId: string) {
     return messageData.shapes;
   });
 
-  return shapes;
+  // Reverse the shapes so that older elements render first, and newer elements (like erasers) render on top.
+  return shapes.reverse();
 }
 
 function Rectangle(
@@ -187,6 +238,7 @@ function Rectangle(
 ) {
   clearCanvas(existingShapes, canvas, ctx);
   ctx.strokeStyle = "rgba(255,255,255)";
+  ctx.lineWidth = 1;
   ctx.strokeRect(startX, startY, width, height);
 }
 
@@ -196,26 +248,30 @@ function Circle(
   canvas: HTMLCanvasElement,
   startX: number,
   startY: number,
-  width: number
+  width: number,
 ) {
   clearCanvas(existingShapes, canvas, ctx);
+  ctx.strokeStyle = "rgba(255,255,255)";
+  ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.arc(startX, startY, Math.abs(width), 0, 2 * 3.14);
   ctx.stroke();
 }
 
-function Line(  ctx: CanvasRenderingContext2D,
+function Line(
+  ctx: CanvasRenderingContext2D,
   existingShapes: Shapes[],
   canvas: HTMLCanvasElement,
   x1: number,
   y1: number,
-  x2 : number,
-  y2:number
-) 
-  {
-   clearCanvas(existingShapes, canvas, ctx);
-   ctx.beginPath();
-   ctx.moveTo(x1,y1);
-   ctx.lineTo(x2,y2);
-   ctx.stroke();
+  x2: number,
+  y2: number,
+) {
+  clearCanvas(existingShapes, canvas, ctx);
+  ctx.strokeStyle = "rgba(255,255,255)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
 }

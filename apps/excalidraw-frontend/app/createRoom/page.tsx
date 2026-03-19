@@ -1,33 +1,32 @@
 "use client";
 import axios from "axios";
 import { redirect, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BACKEND_URL } from "../config";
 
-export default function Home() {
+export default function createRoom() {
   const [slug, setSlug] = useState("");
   const router = useRouter();
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user") || ""),
-  );
-  const [userId, setUserId] = useState(user?.id);
-  const [rooms, setRooms] = useState([]);
+
 
   if (!token) {
     return redirect("../auth/signup");
   }
-  async function getRooms() {
-    const response = await axios.get(`${BACKEND_URL}/workroom/${userId}`, {
-      params: {
-        userId: userId,
-      },
+ 
+  async function createRoomFunction(){
+    const response = await axios.post(`${BACKEND_URL}/room`,{
+      name:slug
+    },{
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":`${token}`
+      }
     });
-    setRooms(response.data.rooms);
+   console.log("Response",response);
+   const roomId = response.data.roomId;
+    router.push(`/room/${slug}`);
   }
-  useEffect(() => {
-      getRooms();
-  }, []);
 
   return (
     <div
@@ -51,7 +50,9 @@ export default function Home() {
           gap: "18px",
         }}
       >
-        <h2 style={{ color: "#fff", textAlign: "center" }}>Join a Room</h2>
+        <h2 style={{ color: "#fff", textAlign: "center" }}>
+          Create a Room
+        </h2>
 
         <input
           type="text"
@@ -65,12 +66,13 @@ export default function Home() {
 
         <button
           onClick={() => {
-            router.push(`/room/${slug}`);
+            createRoomFunction();
+          
           }}
           style={primaryButton}
           disabled={!slug}
         >
-          Join Room
+          Create Room
         </button>
 
         <p
@@ -78,27 +80,14 @@ export default function Home() {
             color: "#aaa",
             fontSize: "12px",
             textAlign: "center",
-            cursor: "pointer",
+            cursor:"pointer"
           }}
-        >
-          Enter a valid room name to continue <span>Or</span>
-          <p
-            onClick={() => {
-              redirect("/createRoom");
-            }}
-          >
-            {" "}
-            Create a Room{" "}
-          </p>
+        onClick={() =>{
+          redirect('/home')
+        }}>
+          Join an Existing Room
         </p>
-      </div>
-      <div className="w-52 h-12 border-white border-2 bg-white text-black absolute right-52 top-12 rounded-2xl font-semibold">
-        <div className="flex justify-center mt-2 ">Rooms Joined</div>
-        <div className="h-96 border-white border-2 mt-3 rounded-2xl text-white">
-          {rooms.map((room) => {
-            return <div key={room.slug} className="m-2"> Rooms id :  {room.slug}</div>;
-          })}
-        </div>
+      
       </div>
     </div>
   );

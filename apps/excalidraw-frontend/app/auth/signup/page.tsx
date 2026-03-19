@@ -86,7 +86,7 @@ export default function Signup() {
           }}
           style={secondaryButton}
         >
-          Signup
+          Sign in
         </button>
       </div>
     </div>

@@ -8,14 +8,15 @@ import {
 } from "@repo/common/zod";
 import prisma from "@repo/db/config";
 import UserMiddleware from "./middleware/verifyUser";
-import cors from "cors"
-
+import cors from "cors";
 
 const app = express();
-app.use(cors({
-    origin:"http://localhost:3000",
-    credentials: true
-  }))
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 
@@ -35,7 +36,7 @@ app.post("/signin", async (req, res) => {
       msg: "Fill all the required Fields",
     });
   }
-  const {  email, password } = result.data;
+  const { email, password } = result.data;
   //db call to find
   const user = await prisma.user.findUnique({
     where: {
@@ -46,11 +47,11 @@ app.post("/signin", async (req, res) => {
   if (!user) {
     return res.status(404).json("User not found Please sign up");
   }
-  const token = jwt.sign({ id:user?.id,email: email }, JWTSECRET, {
+  const token = jwt.sign({ id: user?.id, email: email }, JWTSECRET, {
     expiresIn: 3600,
   });
   return res.json({
-    id:user?.id,
+    id: user?.id,
     email,
     token,
   });
@@ -81,7 +82,7 @@ app.post("/signup", async (req, res) => {
     });
   }
   //create a user and store in db
-   const user =  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email: email,
       password: password,
@@ -89,11 +90,11 @@ app.post("/signup", async (req, res) => {
     },
   });
 
-  const token = jwt.sign({ id:user.id,email: email, name: name }, JWTSECRET, {
+  const token = jwt.sign({ id: user.id, email: email, name: name }, JWTSECRET, {
     expiresIn: 3600,
   });
   return res.json({
-    id:user.id,
+    id: user.id,
     name,
     email,
     token,
@@ -118,22 +119,22 @@ app.post("/room", UserMiddleware, async (req, res) => {
     return findRoom;
   }
   //@ts-ignore
-const userId=req.user.id;
+  const userId = req.user.id;
   const createRoom = await prisma.room.create({
     data: {
       slug: name,
-      adminId:userId
+      adminId: userId,
     },
   });
   return res.json({
-   roomId: createRoom.id,
-  message: "Room Created Successfully",
+    roomId: createRoom.id,
+    message: "Room Created Successfully",
   });
 });
 
 app.get("/chats/:roomId", async (req, res) => {
   const roomId = Number(req.params.roomId);
-  console.log(roomId)
+  console.log(roomId);
   if (!roomId) {
     return res.status(404).json({
       msg: "Room id not found",
@@ -141,41 +142,42 @@ app.get("/chats/:roomId", async (req, res) => {
   }
   const findChats = await prisma.chat.findMany({
     where: {
-      roomId: roomId
+      roomId: roomId,
     },
-    orderBy:{
-      id:"desc"
+    orderBy: {
+      id: "desc",
     },
-    take:50
+    take: 150,
   });
 
-
   return res.json({
-     messages: findChats
+    messages: findChats,
   });
 });
 
-app.get("/room/:slug",async (req,res) => {
+app.get("/room/:slug", async (req, res) => {
   const slug = req.params.slug;
   const room = await prisma.room.findFirst({
-    where:{
-       slug:slug
-    }
-  })
+    where: {
+      slug: slug,
+    },
+  });
   return res.json({
-    room
+    room,
   });
 });
 
-
-app.get("/room/:roomId",async(req,res) =>{
-  const roomId = req.params.roomId;
-  const roomsJoined = await prisma.user.findUnique({
-    where : {
-      
+app.get("/workroom/:userId", async (req, res) => {
+  const  userId  = req.params.userId;
+  const rooms = await prisma.room.findMany({
+    where: {
+      adminId: userId
     }
-  })
-})
+  });
+  return res.json({
+    rooms
+  });
+});
 
 const server = app.listen(8001, () => {
   console.log(`Serve runnning on port http://localhost:8001`);

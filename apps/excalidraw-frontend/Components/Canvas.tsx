@@ -74,6 +74,7 @@ useEffect(() => {
           setType("line");
         }}>line</button>
         <button className="p-2 m-2 border-2 border-black rounded-full" onClick={() => {
+          console.log("eraser is chosen")
           setType("eraser");
         }}>Eraser</button>
       </div>
