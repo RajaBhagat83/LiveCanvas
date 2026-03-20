@@ -7,7 +7,10 @@ import { redirect } from "next/navigation";
 export default function Signin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  if (token) {
+    redirect("../home");
+  }
   async function SendData() {
     const response = await axios.post(`${BACKEND_URL}/signin`, {
       email: email,
@@ -15,7 +18,7 @@ export default function Signin() {
     });
     const token = "Bearer " + response.data.token;
     localStorage.setItem("token", token);
-    localStorage.setItem("user",JSON.stringify(response.data))
+    localStorage.setItem("user", JSON.stringify(response.data));
     redirect("../home");
   }
 
@@ -61,11 +64,7 @@ export default function Signin() {
           style={inputStyle}
         />
 
-        <button
-          type="button"
-          onClick={SendData}
-          style={primaryButton}
-        >
+        <button type="button" onClick={SendData} style={primaryButton}>
           Enter
         </button>
 

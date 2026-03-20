@@ -9,13 +9,12 @@ export default function CanvasComponent({
   roomId: string;
   socket: WebSocket;
 }) {
-  const [type, setType] = useState('rect')
+  const [type, setType] = useState('line')
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [width,setWidth] = useState<number>(); 
   const [height,setHeight] = useState<number>(); 
   const canvas = canvasRef.current;
-
- 
+  
 
   useEffect(() => {
     console.log("Socket is made the connection")
@@ -51,33 +50,62 @@ useEffect(() => {
     window.removeEventListener("resize", resizeCanvas);
   };
 }, []);
+return (
+  <div
+    style={{
+      height: "100vh",
+      overflow: "hidden",
+      position: "relative",
+    }}
+  >
+    <canvas
+      ref={canvasRef}
+      height={height}
+      width={width}
+      className="border-4"
+    ></canvas>
 
-  return (
-    <div style={ {
-      height:"100vh",
-      overflow:"hidden"
-    }}>
-      <canvas
-        ref={canvasRef}
-        height={height}
-        width={width}
-        className="border-4 "
-      ></canvas>
-      <div className="absolute bottom-10 right-10 text-black bg-white">
-        <button className="p-2 m-2 border-2 border-black rounded-2xl" onClick={() => {
-          setType("rect");
-        }}>Rect</button>
-        <button className="p-2 m-2 border-2 border-black rounded-full" onClick={() => {
-          setType("circle");
-        }}>Circ</button>
-         <button className="p-2 m-2 border-2 border-black rounded-full" onClick={() => {
-          setType("line");
-        }}>line</button>
-        <button className="p-2 m-2 border-2 border-black rounded-full" onClick={() => {
-          console.log("eraser is chosen")
+    {/* 🎯 Floating Toolbar (Excalidraw Style) */}
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white shadow-xl rounded-2xl px-4 py-2 flex gap-3 items-center border">
+      
+      <button
+        className={`p-2 px-4 rounded-xl border ${
+          type === "rect" ? "bg-black text-white" : "bg-white text-black"
+        }`}
+        onClick={() => setType("rect")}
+      >
+        Rect
+      </button>
+
+      <button
+        className={`p-2 px-4 rounded-xl border ${
+          type === "circle" ? "bg-black text-white" : "bg-white text-black"
+        }`}
+        onClick={() => setType("circle")}
+      >
+        Circle
+      </button>
+
+      <button
+        className={`p-2 px-4 rounded-xl border ${
+          type === "line" ? "bg-black text-white" : "bg-white text-black"
+        }`}
+        onClick={() => setType("line")}
+      >
+        Line
+      </button>
+
+      <button
+        className={`p-2 px-4 rounded-xl border ${
+          type === "eraser" ? "bg-black text-white" : "bg-white text-black"
+        }`}
+        onClick={() => {
           setType("eraser");
-        }}>Eraser</button>
-      </div>
+        }}
+      >
+        Eraser
+      </button>
     </div>
-  );
+  </div>
+);
 }

@@ -82,7 +82,7 @@ wss.on("connection", (ws, request) => {
           user.ws.send(
             JSON.stringify({
               type: "chat",
-              message: message,
+              message: Number(message),
               roomId: roomId,
             }),
           );

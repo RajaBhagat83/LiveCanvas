@@ -2,9 +2,14 @@
 
 import useSocket from "@/hooks/useSocket";
 import CanvasComponent from "./Canvas";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 
 export default function RoomCanvas({roomId}:{roomId : string}){
+   const [token,setToken] = useState(localStorage.getItem("token"));
+  if(!token){
+    return redirect("../auth/signin");
+  }
 
   const {socket,loading} =useSocket();
 

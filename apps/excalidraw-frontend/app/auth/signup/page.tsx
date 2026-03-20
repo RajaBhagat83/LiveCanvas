@@ -9,6 +9,10 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [token,setToken] = useState(localStorage.getItem("token"));
+  if(token){
+    redirect("../home");
+  }
 
   async function SendData() {
     const response = await axios.post(`${BACKEND_URL}/signup`, {
@@ -17,7 +21,9 @@ export default function Signup() {
       name:name
     });
     const token = "Bearer " + response.data.token;
+    setToken(response.data.token);
     localStorage.setItem("token", token);
+    localStorage.setItem("user",JSON.stringify(response.data))
     redirect("../home");
   }
 

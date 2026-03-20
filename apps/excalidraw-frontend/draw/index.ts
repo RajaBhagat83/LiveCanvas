@@ -133,7 +133,7 @@ export default async function initDraw(
         currentEraserPath.push({x: e.clientX, y: e.clientY});
         clearCanvas(existingShapes, canvas, ctx);
         ctx.strokeStyle = "rgba(0,0,0,1)";
-        ctx.lineWidth = 10;
+        ctx.lineWidth = 20;
         ctx.lineCap = "round";
         ctx.beginPath();
         if (currentEraserPath.length > 0) {
@@ -147,6 +147,37 @@ export default async function initDraw(
     }
   };
 
+  function TextArea(e:any){
+      var textArea = document.createElement("textarea");
+      const rect = canvas.getBoundingClientRect();
+
+      textArea.style.position = "absolute";
+      textArea.style.top = (e.clientY - rect.top)+'px';
+      textArea.style.left = (e.clientX-rect.left)+'px';
+      textArea.style.width = '200px';
+      textArea.style.height = '30px';
+      textArea.style.zIndex = '100';
+      textArea.style.color = 'white'
+      textArea.style.caretColor = 'white';
+      textArea.style.padding = '2px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+
+      textArea.addEventListener('blur',()=>{
+        const textvalue = textArea.value;
+        if(!ctx)return;
+        ctx.font= '16px Arial';
+        ctx?.fillText(textvalue,e.clientX-rect.left,e.clientY-rect.top);
+        socket.send(JSON.stringify({
+          type:"chat",
+          message:JSON.stringify(textvalue),
+          roomId:Number(roomId)
+        }))
+      })
+
+
+  }
+  canvas.addEventListener('dblclick',TextArea);
   canvas.addEventListener("mouseup", mouseUpHandler);
   canvas.addEventListener("mousedown", mouseDownHandler);
   canvas.addEventListener("mousemove", mouseMoveHandler);
@@ -155,6 +186,7 @@ export default async function initDraw(
     canvas.removeEventListener("mouseup", mouseUpHandler);
     canvas.removeEventListener("mousedown", mouseDownHandler);
     canvas.removeEventListener("mousemove", mouseMoveHandler);
+    canvas.removeEventListener('dblclick',TextArea);
   };
 }
 
@@ -176,6 +208,7 @@ function clearCanvas(
     if(shape.type == "circle") {
       ctx.strokeStyle = "rgba(255,255,255)";
       ctx.lineWidth = 1;
+
       ctx.beginPath();
       ctx.arc(
         shape.centerX,
@@ -198,7 +231,7 @@ function clearCanvas(
     }
     if (shape.type == "eraser") {
       ctx.strokeStyle = "rgba(0,0,0,1)";
-      ctx.lineWidth = 10;
+      ctx.lineWidth = 20;
       ctx.lineCap = "round";
       ctx.beginPath();
       if (shape.path && shape.path.length > 0) {
