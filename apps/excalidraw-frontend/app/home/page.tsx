@@ -135,7 +135,7 @@ return (
           fontSize: "16px",
         }}
       >
-        Rooms Joined
+        Rooms Created
       </div>
 
       <div

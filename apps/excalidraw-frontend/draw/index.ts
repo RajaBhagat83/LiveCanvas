@@ -45,7 +45,7 @@ export default async function initDraw(
   socket.send(
     JSON.stringify({
       type: "join_room",
-      roomId,
+      roomId, 
     }),
   );
 
