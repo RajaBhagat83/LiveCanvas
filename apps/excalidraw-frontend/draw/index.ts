@@ -1,4 +1,5 @@
 import { BACKEND_URL } from "@/app/config";
+import { MutableRefObject } from "react";
 import axios from "axios";
 
 type Shapes =
@@ -35,7 +36,7 @@ export default async function initDraw(
   canvas: HTMLCanvasElement,
   roomId: string,
   socket: WebSocket,
-  type: string,
+  typeRef: MutableRefObject<string>,
 ) {
   const ctx = canvas.getContext("2d");
 
@@ -93,8 +94,9 @@ export default async function initDraw(
       type: "eraser",
       path: currentEraserPath,
     };
+    const type = typeRef.current;
     let shapes;
-   type == "rect" ? (shapes = rect) : type=="circle" ? (shapes = circ) : type =="eraser" ? (shapes = eraser):(shapes = line);
+    type == "rect" ? (shapes = rect) : type=="circle" ? (shapes = circ) : type =="eraser" ? (shapes = eraser):(shapes = line);
     if (type === "eraser" && currentEraserPath.length === 0) return;
     existingShapes.push(shapes);
     socket.send(
@@ -108,17 +110,20 @@ export default async function initDraw(
 
   const mouseDownHandler = (e: MouseEvent) => {
     clicked = true;
-    startX = e.clientX ;
-    startY = e.clientY ;
-    if (type === "eraser") {
+    startX = e.clientX;
+    startY = e.clientY;
+    if (typeRef.current === "eraser") {
       currentEraserPath = [{x: startX, y: startY}];
+    } else {
+      currentEraserPath = [];
     }
   };
 
-  const mouseMoveHandler =async (e: MouseEvent) => {
+  const mouseMoveHandler = (e: MouseEvent) => {
     if (clicked) {
       const width = e.clientX - startX;
       const height = e.clientY - startY;
+      const type = typeRef.current;
 
       if (type === "rect") {
         Rectangle(ctx, existingShapes, canvas, startX, startY, width, height);
@@ -156,7 +161,6 @@ export default async function initDraw(
       textArea.style.left = (e.clientX-rect.left)+'px';
       textArea.style.width = '200px';
       textArea.style.height = '30px';
-      textArea.style.zIndex = '100';
       textArea.style.color = 'white'
       textArea.style.caretColor = 'white';
       textArea.style.padding = '2px';
@@ -168,11 +172,6 @@ export default async function initDraw(
         if(!ctx)return;
         ctx.font= '16px Arial';
         ctx?.fillText(textvalue,e.clientX-rect.left,e.clientY-rect.top);
-        socket.send(JSON.stringify({
-          type:"chat",
-          message:JSON.stringify(textvalue),
-          roomId:Number(roomId)
-        }))
       })
 
 
@@ -199,7 +198,7 @@ function clearCanvas(
   ctx.fillStyle = "rgba(0,0,0)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   existingShapes.map((shape) => {
-    if (shape.type === "rect") {
+    if (shape.type == "rect") {
       ctx.strokeStyle = "rgba(255,255,255)";
       ctx.lineWidth = 1;
       ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);

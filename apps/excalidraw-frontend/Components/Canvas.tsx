@@ -10,26 +10,30 @@ export default function CanvasComponent({
   socket: WebSocket;
 }) {
   const [type, setType] = useState('line')
+  const typeRef = useRef('line')
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [width,setWidth] = useState<number>(); 
   const [height,setHeight] = useState<number>(); 
   const canvas = canvasRef.current;
   
 
+  // Keep typeRef in sync whenever the user switches tools
   useEffect(() => {
-    console.log("Socket is made the connection")
+    typeRef.current = type;
+  }, [type]);
 
+  useEffect(() => {
     if (canvasRef.current && socket) {
-
-      const cleanup = initDraw(canvasRef.current, roomId, socket, type);
+      const cleanup = initDraw(canvasRef.current, roomId, socket, typeRef);
       return () => {
-        // cleanup();
         cleanup.then((clean) => {
           clean?.();
         })
       }
     }
-  }, [canvasRef, socket, type, roomId]);
+  // Do NOT include type/typeRef here — we want initDraw to run only once
+  // per canvas/socket/roomId, and read the latest type via the ref.
+  }, [canvasRef, socket, roomId]);
   
 useEffect(() => {
   const resizeCanvas = () => {
