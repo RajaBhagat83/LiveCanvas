@@ -20,7 +20,7 @@ RUN pnpm install --frozen-lockfile
 COPY /apps/http-backend/ ./apps/http-backend/  
 
 #  // this is the working directory for the container
-WORKDIR /app/apps/htt-backend 
+WORKDIR /app/apps/http-backend 
 
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
@@ -29,4 +29,4 @@ RUN pnpm --filter @repo/db run generate
 
 EXPOSE 8001
 
-CMD ["npm","run","dev:docker"]
+CMD ["pnpm","run","dev:docker"]

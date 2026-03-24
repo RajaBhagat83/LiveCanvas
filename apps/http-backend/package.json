@@ -7,7 +7,7 @@
     "build": "tsc -b",
     "start": "npm run build && tsx src/index.ts",
     "dev": "tsx src/index.ts",
-    "dev:docker":"npx prisma migrate dev && tsx src/index.ts"
+    "dev:docker":"prisma migrate dev && tsx src/index.ts"
   },
   "dependencies": {
     "@repo/typescript-config": "workspace:*",
