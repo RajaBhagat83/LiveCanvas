@@ -1,19 +1,22 @@
 "use client";
 import axios from "axios";
 import { redirect, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BACKEND_URL } from "../config";
 
 export default function createRoom() {
   const [slug, setSlug] = useState("");
   const router = useRouter();
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState<string | null>(null);
 
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    if (!storedToken) {
+      redirect("../auth/signup");
+    }
+  }, []);
 
-  if (!token) {
-    return redirect("../auth/signup");
-  }
- 
   async function createRoomFunction(){
     const response = await axios.post(`${BACKEND_URL}/room`,{
       name:slug

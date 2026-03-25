@@ -29,4 +29,4 @@ RUN pnpm --filter @repo/db run generate
 
 EXPOSE 8001
 
-CMD ["pnpm","run","dev:docker"]
+CMD ["pnpm","exec","tsx","src/index.ts"]

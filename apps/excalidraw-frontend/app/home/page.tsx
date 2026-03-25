@@ -7,28 +7,47 @@ import { BACKEND_URL } from "../config";
 export default function Home() {
   const [slug, setSlug] = useState("");
   const router = useRouter();
-  const [token, setToken] = useState(localStorage.getItem("token"));
-    if (!token) {
-    return redirect("../auth/signin");
-  }
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user") || ""),
-  );
-  const [userId, setUserId] = useState(user?.id);
-  const [rooms, setRooms] = useState([]);
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [rooms, setRooms] = useState<Rooms[]>([]);
 
-
-  async function getRooms() {
-    const response = await axios.get(`${BACKEND_URL}/workroom/${userId}`, {
-      params: {
-        userId: userId,
-      },
-    });
-    setRooms(response.data.rooms);
-  }
   useEffect(() => {
-      getRooms();
+    const t = localStorage.getItem("token");
+    setToken(t);
+    if (!t) {
+      redirect("../auth/signin");
+    }
+    const u = localStorage.getItem("user");
+    if (u) {
+      try {
+        const parsedUser = JSON.parse(u);
+        setUser(parsedUser);
+        setUserId(parsedUser.id);
+      } catch (err) {
+        console.error("Failed to parse user from localStorage", err);
+      }
+    }
   }, []);
+
+  type Rooms = {
+    slug: string;
+  };
+
+  useEffect(() => {
+    async function getRooms() {
+      if (!userId) return;
+      try {
+        const response = await axios.get(`${BACKEND_URL}/workroom/${userId}`, {
+          params: { userId },
+        });
+        setRooms(response.data.rooms);
+      } catch (err) {
+        console.error("Failed to fetch rooms", err);
+      }
+    }
+    getRooms();
+  }, [userId]);
 return (
   <div
     style={{
@@ -147,7 +166,7 @@ return (
           gap: "8px",
         }}
       >
-        {rooms.map((room) => {
+        {rooms.map((room ) => {
           return (
             <div
               key={room.slug}

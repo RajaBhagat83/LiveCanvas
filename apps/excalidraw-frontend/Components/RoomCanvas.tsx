@@ -6,10 +6,15 @@ import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 
 export default function RoomCanvas({roomId}:{roomId : string}){
-   const [token,setToken] = useState(localStorage.getItem("token"));
-  if(!token){
-    return redirect("../auth/signin");
-  }
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const t = localStorage.getItem("token");
+    setToken(t);
+    if (!t) {
+      redirect("../auth/signin");
+    }
+  }, []);
 
   const {socket,loading} =useSocket();
 

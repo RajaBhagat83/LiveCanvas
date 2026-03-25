@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 //   return response.data.messages;
 // }
 
-export default async function Chats({id}:{id:string}){
+export default async function Chats({id}:{id:string}) :Promise<never>{
   //  console.log(`${BACKEND_URL}/chats/${id}`);
   // const messages = await getChats(id);
 //  return <ChatRoomClient messages={messages} id={id} />

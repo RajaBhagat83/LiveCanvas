@@ -1,7 +1,7 @@
 
 "use client";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BACKEND_URL } from "../../config";
 import { redirect } from "next/navigation";
 
@@ -9,10 +9,15 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [token,setToken] = useState(localStorage.getItem("token"));
-  if(token){
-    redirect("../home");
-  }
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+    if (storedToken) {
+      redirect("../home");
+    }
+  }, []);
 
   async function SendData() {
     const response = await axios.post(`${BACKEND_URL}/signup`, {
